@@ -1,4 +1,5 @@
 #include "constraints.h"
+#include "dimensions.h"
 
 inline float sd(float val)
 {
@@ -6,25 +7,23 @@ inline float sd(float val)
 }
 
 float distance_constraint(const Eigen::Vector<float, 13> &state,
-                          const Eigen::Vector3f& stationary_joint,
-                          const Eigen::Vector3f& moving_joint,
-                          float distance) 
+                          const DistanceConstraint& constraint) 
 {
-    float& x = state(0);
-    float& y = state(1);
-    float& z = state(2);
-    float& q0 = state(6);
-    float& qx = state(7);
-    float& qy = state(8);
-    float& qz = state(9);
+    const float& x = state(0);
+    const float& y = state(1);
+    const float& z = state(2);
+    const float& q0 = state(6);
+    const float& qx = state(7);
+    const float& qy = state(8);
+    const float& qz = state(9);
 
-    float& rax = moving_joint(0);
-    float& ray = moving_joint(1);
-    float& raz = moving_joint(2);
+    const float& rax = constraint.moving_joint(0);
+    const float& ray = constraint.moving_joint(1);
+    const float& raz = constraint.moving_joint(2);
 
-    float& rbx = stationary_joint(0);
-    float& rby = stationary_joint(1);
-    float& rbz = stationary_joint(2);
+    const float& rbx = constraint.stationary_joint(0);
+    const float& rby = constraint.stationary_joint(1);
+    const float& rbz = constraint.stationary_joint(2);
 
     return sd(rbx - x - rax*(2.0f * sd(q0) + 2.0f * sd(qx) - 1.0f) 
         + ray*(2.0f*q0*qz - 2.0f*qx*qy) 
@@ -33,30 +32,28 @@ float distance_constraint(const Eigen::Vector<float, 13> &state,
         + rax*(2*q0*qz + 2.0f*qx*qy) + raz*(2*q0*qx + 2.0f*qy*qz))
         + sd(z - rbz + raz*(2.0f*sd(q0) + 2.0f*sd(qz) - 1.0f) 
         + rax*(2.0f*q0*qy + 2.0f*qx*qz) - ray*(2.0f*q0*qx - 2.0f*qy*qz)) 
-        - distance * distance;
+        - constraint.distance * constraint.distance;
 }
 
 Eigen::VectorXf distance_constraint_derivative(const Eigen::Vector<float, 13> &state,
-                                              const Eigen::Vector3f& stationary_joint,
-                                              const Eigen::Vector3f& moving_joint,
-                                              float distance) 
+                                               const DistanceConstraint& constraint) 
 {
     Eigen::VectorXf derivative = Eigen::VectorXf::Zero(13);
-    float& x = state(0);
-    float& y = state(1);
-    float& z = state(2);
-    float& q0 = state(6);
-    float& qx = state(7);
-    float& qy = state(8);
-    float& qz = state(9);
+    const float& x = state(0);
+    const float& y = state(1);
+    const float& z = state(2);
+    const float& q0 = state(6);
+    const float& qx = state(7);
+    const float& qy = state(8);
+    const float& qz = state(9);
 
-    float& rax = moving_joint(0);
-    float& ray = moving_joint(1);
-    float& raz = moving_joint(2);
+    const float& rax = constraint.moving_joint(0);
+    const float& ray = constraint.moving_joint(1);
+    const float& raz = constraint.moving_joint(2);
 
-    float& rbx = stationary_joint(0);
-    float& rby = stationary_joint(1);
-    float& rbz = stationary_joint(2);
+    const float& rbx = constraint.stationary_joint(0);
+    const float& rby = constraint.stationary_joint(1);
+    const float& rbz = constraint.stationary_joint(2);
 
     derivative(0) = 2.0f * (x - rbx + rax*(2.0f * sd(q0) + 2.0f * sd(qx) - 1.0f))
         + 4.0f * ray * (q0*qz - qx*qy) 
@@ -102,20 +99,21 @@ Eigen::VectorXf distance_constraint_derivative(const Eigen::Vector<float, 13> &s
 }
 
 Eigen::VectorXf constraints(const Eigen::Vector<float, 13> &state) {
-    Eigen::VectorXf FI = Eigen::VectorXf(2);
+    Eigen::VectorXf FI = Eigen::VectorXf(1 + num_constraints);
     auto q = state.segment<4>(6);
     FI(0) = q.squaredNorm() - 1.0f;
-    FI(1) = 2 * (q(0) * q(3) + q(1) * q(2));
+    for(int i = 0; i < num_constraints; i++) {
+        FI(i + 1) += distance_constraint(state, distance_constraints[i]);
+    }
     return FI;
 }
 
 Eigen::MatrixXf constraints_derivative(const Eigen::Vector<float, 13> &state) {
-    Eigen::MatrixXf FId = Eigen::MatrixXf::Zero(2,13);
+    Eigen::MatrixXf FId = Eigen::MatrixXf::Zero(1 + num_constraints,13);
     auto q = state.segment<4>(6);
     FId.block<1,4>(0,6) = 2.0f * q.transpose();
-    FId(1,6) = 2 * q(3);
-    FId(1,7) = 2 * q(2);
-    FId(1,8) = 2 * q(1);
-    FId(1,9) = 2 * q(0);
+    for(int i = 0; i < num_constraints; i++) {
+        FId.row(i + 1) = distance_constraint_derivative(state, distance_constraints[i]).transpose();
+    }
     return FId;
 }
