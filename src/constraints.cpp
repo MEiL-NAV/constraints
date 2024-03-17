@@ -26,13 +26,12 @@ float distance_constraint(const Eigen::Vector<float, 13> &state,
     const float& rbz = constraint.stationary_joint(2);
 
     return sd(rbx - x - rax*(2.0f * sd(q0) + 2.0f * sd(qx) - 1.0f) 
-        + ray*(2.0f*q0*qz - 2.0f*qx*qy) 
-        + raz*(2.0f*q0*qy - 2.0f*qx*qz)) 
+        + ray*(2.0f*q0*qz - 2.0f*qx*qy) + raz*(2.0f*q0*qy - 2.0f*qx*qz)) 
         + sd(y - rby + ray*(2.0f*sd(q0) + 2.0f*sd(qy) - 1.0f) 
         + rax*(2*q0*qz + 2.0f*qx*qy) + raz*(2*q0*qx + 2.0f*qy*qz))
         + sd(z - rbz + raz*(2.0f*sd(q0) + 2.0f*sd(qz) - 1.0f) 
         + rax*(2.0f*q0*qy + 2.0f*qx*qz) - ray*(2.0f*q0*qx - 2.0f*qy*qz)) 
-        - constraint.distance * constraint.distance;
+        - sd(constraint.distance);
 }
 
 Eigen::VectorXf distance_constraint_derivative(const Eigen::Vector<float, 13> &state,
@@ -103,7 +102,7 @@ Eigen::VectorXf constraints(const Eigen::Vector<float, 13> &state) {
     auto q = state.segment<4>(6);
     FI(0) = q.squaredNorm() - 1.0f;
     for(int i = 0; i < num_constraints; i++) {
-        FI(i + 1) += distance_constraint(state, distance_constraints[i]);
+        FI(i + 1) = distance_constraint(state, distance_constraints[i]);
     }
     return FI;
 }

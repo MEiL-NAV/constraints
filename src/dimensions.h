@@ -38,6 +38,28 @@ const DistanceConstraint distance_constraints[] = {
         .moving_joint = {0.0f, -0.2f, 0.0f},
         .distance = 0.5f
     }
+    
+    // Example constraints for testing
+    // DistanceConstraint {
+    //     .stationary_joint = {1.0f, 0.0f, 0.0f},
+    //     .moving_joint = {0.0f, 0.0f, 0.0f},
+    //     .distance = 1.0f
+    // },
+    // DistanceConstraint {
+    //     .stationary_joint = {0.0f, 1.0f, 0.0f},
+    //     .moving_joint = {0.0f, 0.0f, 0.0f},
+    //     .distance = 1.0f
+    // },
+    // DistanceConstraint {
+    //     .stationary_joint = {0.0f, 0.0f, 1.0f},
+    //     .moving_joint = {0.0f, 0.0f, 0.0f},
+    //     .distance = 1.0f
+    // },
+    // DistanceConstraint {
+    //     .stationary_joint = {1.0f, 1.0f, 1.0f},
+    //     .moving_joint = {0.0f, 0.0f, 0.0f},
+    //     .distance = 1.0f
+    // },
 };
 
 constexpr int num_constraints = static_cast<int>(sizeof(distance_constraints) / sizeof(DistanceConstraint));
