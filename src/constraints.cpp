@@ -98,21 +98,20 @@ Eigen::VectorXf distance_constraint_derivative(const Eigen::Vector<float, 15> &s
 }
 
 Eigen::VectorXf constraints(const Eigen::Vector<float, 15> &state) {
-    Eigen::VectorXf FI = Eigen::VectorXf(1 + num_constraints);
+    Eigen::VectorXf FI = Eigen::VectorXf(2);
     auto q = state.segment<4>(6);
     FI(0) = q.squaredNorm() - 1.0f;
-    for(int i = 0; i < num_constraints; i++) {
-        FI(i + 1) = distance_constraint(state, distance_constraints[i]);
-    }
+    FI(1) = 2 * (q(0) * q(3) + q(1) * q(2));
     return FI;
 }
 
 Eigen::MatrixXf constraints_derivative(const Eigen::Vector<float, 15> &state) {
-    Eigen::MatrixXf FId = Eigen::MatrixXf::Zero(1 + num_constraints,15);
+    Eigen::MatrixXf FId = Eigen::MatrixXf::Zero(2,15);
     auto q = state.segment<4>(6);
     FId.block<1,4>(0,6) = 2.0f * q.transpose();
-    for(int i = 0; i < num_constraints; i++) {
-        FId.row(i + 1) = distance_constraint_derivative(state, distance_constraints[i]).transpose();
-    }
+    FId(1,6) = 2 * q(3);
+    FId(1,7) = 2 * q(2);
+    FId(1,8) = 2 * q(1);
+    FId(1,9) = 2 * q(0);
     return FId;
 }
