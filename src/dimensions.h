@@ -9,34 +9,34 @@ struct DistanceConstraint {
 
 const DistanceConstraint distance_constraints[] = {
     DistanceConstraint {
-        .stationary_joint = {-0.1f, -0.2f, -0.4f},
+        .stationary_joint = {0.2f, -0.2f, -0.165f},
         .moving_joint = {0.2f, -0.2f, 0.0f},
-        .distance = 0.5f
+        .distance = 0.275f
     },
     DistanceConstraint {
-        .stationary_joint = {-0.1f, 0.2f, -0.4f},
+        .stationary_joint = {0.2f, 0.2f, -0.165f},
         .moving_joint = {0.2f, 0.2f, 0.0f},
-        .distance = 0.5f
+        .distance = 0.275f
     },
     DistanceConstraint {
-        .stationary_joint = {-0.5f, -0.2f, -0.4f},
+        .stationary_joint = {-0.2f, -0.2f, -0.165f},
         .moving_joint = {-0.2f, -0.2f, 0.0f},
-        .distance = 0.5f
+        .distance = 0.275f
     },
     DistanceConstraint {
-        .stationary_joint = {-0.5f, 0.2f, -0.4f},
+        .stationary_joint = {-0.2f, 0.2f, -0.165f},
         .moving_joint = {-0.2f, 0.2f, 0.0f},
-        .distance = 0.5f
+        .distance = 0.275f
     },
     DistanceConstraint {
-        .stationary_joint = {-0.3f, 0.2f, 0.4f},
+        .stationary_joint = {0.0f, 0.2f, 0.165f},
         .moving_joint = {0.0f, 0.2f, 0.0f},
-        .distance = 0.5f
+        .distance = 0.275f
     },
     DistanceConstraint {
-        .stationary_joint = {-0.3f, -0.2f, 0.4f},
+        .stationary_joint = {0.0f, -0.2f, 0.165f},
         .moving_joint = {0.0f, -0.2f, 0.0f},
-        .distance = 0.5f
+        .distance = 0.275f
     }
     
     // Example constraints for testing
